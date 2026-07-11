@@ -4,6 +4,8 @@ import { generatedEvents } from "@/lib/recurring";
 import CalendarSubscribeCard from "@/app/components/CalendarSubscribeCard";
 import MonthlyCalendar from "@/app/components/MonthlyCalendar";
 import UpcomingEvents from "@/app/components/UpcomingEvents";
+// Always render fresh on each request so newly added events show up immediately
+export const dynamic = "force-dynamic";
 
 const genSlug = {
   "Generation 1": "gen-1",
