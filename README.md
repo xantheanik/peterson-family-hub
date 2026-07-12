@@ -142,6 +142,49 @@ the same:
 - **Photos (v2):** not in this version yet — intentionally left out of v1 to
   keep the first launch simple.
 
+## Editing and deleting events
+
+Anyone can edit or delete any event — there's no login, matching how adding
+events works. Two safety nets are built in:
+
+- **Deleting always asks for confirmation** first, so a fat-thumbed tap on a
+  phone can't silently remove something.
+- **Every edit or delete sends you an email** with the full before/after
+  details (edits) or the full details at time of removal (deletes), so
+  nothing disappears without a trace — if someone deletes the wrong thing,
+  you'll know within a minute and can re-add it from the email.
+
+### Setting up the email notifications (Resend)
+
+The notification emails are sent through **Resend**, a transactional email
+service with a free tier (100 emails/day — plenty for a family calendar).
+Until this is set up, editing and deleting still work fine; you just won't
+get the notification emails.
+
+1. Go to **resend.com** and sign up (free).
+2. In the Resend dashboard, go to **Domains** → **Add Domain**, enter
+   `petersonplanning.com`, and add the DNS records it shows you (SPF/DKIM —
+   these go in internet.bs's DNS editor, same place as the domain-connection
+   records). This lets email be sent *from* your own domain
+   (`notify@petersonplanning.com`) instead of a generic address.
+3. Wait for it to show **Verified** (usually a few minutes).
+4. Go to **API Keys** → **Create API Key**. Copy it immediately — Resend only
+   shows it once.
+5. In Vercel: your project → **Settings** → **Environment Variables**. Add:
+   - Name: `RESEND_API_KEY`
+   - Value: (the key you copied)
+   - Environments: check all of them (Production, Preview, Development).
+6. **Redeploy** (Deployments → ⋯ → Redeploy) so the new variable takes effect.
+
+After that, edit or delete any event and check the inbox at the address in
+`lib/site.js` (`CONTACT_EMAIL`) — the notification should arrive within
+seconds.
+
+If you'd rather skip domain verification for now, Resend also works with
+their shared test domain, but emails are more likely to land in spam and the
+"from" address won't look like your own — worth doing the domain step if you
+have a few extra minutes.
+
 ### Federal holidays & family birthdays
 
 The calendar automatically shows U.S. federal holidays (handy for spotting
@@ -164,6 +207,9 @@ the Upcoming list.
 
 Parked here so they're not forgotten:
 
+- **Per-device timezone** — currently "today" rolls over at Mountain midnight
+  for everyone. A v2 could let the date and event times follow each viewer's
+  own device timezone instead.
 - **Birth years on birthdays** — store each person's birth year so a birthday
   can read "Margaret turns 50" instead of just her name.
 - **Profile photos** — a picture per family member that shows up on their

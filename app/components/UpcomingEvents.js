@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatEventWhen } from "@/lib/datetime";
+import Link from "next/link";
+import { formatEventWhen, todayStr } from "@/lib/datetime";
 import { googleCalendarLink } from "@/lib/ics";
+import { APP_TIMEZONE } from "@/lib/site";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -54,6 +56,9 @@ function EventCard({ event }) {
           <a className="btn btn-ghost" href={`/api/events/${event.id}/ics`}>
             Add to Apple Calendar
           </a>
+          <Link className="btn btn-ghost" href={`/edit/${event.id}`}>
+            Edit
+          </Link>
         </div>
       </div>
     </div>
@@ -64,18 +69,18 @@ export default function UpcomingEvents({ events }) {
   const [expanded, setExpanded] = useState(false);
 
   const { visible, total } = useMemo(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const windowEnd = new Date(today);
-    windowEnd.setDate(windowEnd.getDate() + WINDOW_DAYS);
-    const windowEndStr = windowEnd.toISOString().slice(0, 10);
+    const todayKey = todayStr(APP_TIMEZONE);
+    // 90 days out from Mountain-time "today".
+    const windowEndDate = new Date(`${todayKey}T00:00:00Z`);
+    windowEndDate.setUTCDate(windowEndDate.getUTCDate() + WINDOW_DAYS);
+    const windowEndStr = windowEndDate.toISOString().slice(0, 10);
 
     // An event still counts as upcoming while it's ongoing (multi-day events
     // that started earlier but haven't ended yet).
     const upcoming = events
       .filter((e) => {
         const end = e.all_day && e.end_date ? normDate(e.end_date) : normDate(e.event_date);
-        return end >= todayStr;
+        return end >= todayKey;
       })
       .sort((a, b) => {
         const ad = normDate(a.event_date), bd = normDate(b.event_date);

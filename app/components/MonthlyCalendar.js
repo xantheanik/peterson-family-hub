@@ -2,8 +2,9 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { displayTimeInZone, enumerateEventDates, formatEventWhen } from "@/lib/datetime";
+import { displayTimeInZone, enumerateEventDates, formatEventWhen, todayStr } from "@/lib/datetime";
 import { googleCalendarLink } from "@/lib/ics";
+import { APP_TIMEZONE } from "@/lib/site";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -28,8 +29,11 @@ function eventMetaLine(event) {
 }
 
 export default function MonthlyCalendar({ events }) {
-  const today = new Date();
-  const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
+  // "Today" in the family's timezone (Mountain), so the calendar's current
+  // month and today-highlight don't flip a day early on a UTC server.
+  const todayKey = todayStr(APP_TIMEZONE); // e.g. "2026-07-10"
+  const [ty, tm] = todayKey.split("-").map(Number);
+  const [view, setView] = useState({ y: ty, m: tm - 1 });
   const [selectedDay, setSelectedDay] = useState(null);
 
   const eventsByDate = useMemo(() => {
@@ -66,8 +70,6 @@ export default function MonthlyCalendar({ events }) {
     return rows;
   }, [view]);
 
-  const todayStr = toDateStr(today);
-
   function prevMonth() {
     setView((v) => {
       const d = new Date(v.y, v.m - 1, 1);
@@ -81,7 +83,7 @@ export default function MonthlyCalendar({ events }) {
     });
   }
   function goToday() {
-    setView({ y: today.getFullYear(), m: today.getMonth() });
+    setView({ y: ty, m: tm - 1 });
   }
 
   const selectedEvents = selectedDay ? eventsByDate[selectedDay] || [] : [];
@@ -129,7 +131,7 @@ export default function MonthlyCalendar({ events }) {
           const ds = toDateStr(d);
           const inMonth = d.getMonth() === view.m;
           const dayEvents = eventsByDate[ds] || [];
-          const isToday = ds === todayStr;
+          const isToday = ds === todayKey;
           const hasEvents = dayEvents.length > 0;
           return (
             <button
@@ -225,6 +227,9 @@ export default function MonthlyCalendar({ events }) {
                           <a className="btn btn-ghost" href={`/api/events/${event.id}/ics`}>
                             Add to Apple Calendar
                           </a>
+                          <Link className="btn btn-ghost" href={`/edit/${event.id}`}>
+                            Edit
+                          </Link>
                         </div>
                       </>
                     )}

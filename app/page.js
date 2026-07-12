@@ -4,7 +4,10 @@ import { generatedEvents } from "@/lib/recurring";
 import CalendarSubscribeCard from "@/app/components/CalendarSubscribeCard";
 import MonthlyCalendar from "@/app/components/MonthlyCalendar";
 import UpcomingEvents from "@/app/components/UpcomingEvents";
-// Always render fresh on each request so newly added events show up immediately
+import AddedBanner from "@/app/components/AddedBanner";
+
+// Always render fresh on each request so newly added events show up
+// immediately (rather than serving a snapshot from build time).
 export const dynamic = "force-dynamic";
 
 const genSlug = {
@@ -37,6 +40,8 @@ export default async function HomePage() {
         <h1 className="hub-title">Peterson Family Hub</h1>
         <p className="hub-tagline">One calendar. Every generation.</p>
       </header>
+
+      <AddedBanner />
 
       {/* 1 — Monthly calendar, first main content block.
           Shows real events PLUS generated holidays & birthdays. */}
