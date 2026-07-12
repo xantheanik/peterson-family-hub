@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import EventForm from "@/app/components/EventForm";
 
 export default function EditEventPage() {
-  const router = useRouter();
   const params = useParams();
   const id = params.id;
 
@@ -34,7 +33,9 @@ export default function EditEventPage() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
-    router.push(`/?updated=${encodeURIComponent(payload.title)}`);
+    // A full navigation (not router.push) so the home page's Router Cache
+    // can't hand back a stale copy of the calendar/upcoming list.
+    window.location.href = `/?updated=${encodeURIComponent(payload.title)}`;
   }
 
   async function handleDelete() {
@@ -44,7 +45,7 @@ export default function EditEventPage() {
       const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not delete this event.");
-      router.push(`/?deleted=${encodeURIComponent(event?.title || "Event")}`);
+      window.location.href = `/?deleted=${encodeURIComponent(event?.title || "Event")}`;
     } catch (err) {
       setDeleteError(err.message);
       setDeleting(false);

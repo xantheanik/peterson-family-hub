@@ -79,8 +79,15 @@ export async function PATCH(request, { params }) {
       submitted_by,
     });
 
-    // Don't let a slow/failed email block the save from succeeding.
-    notifyEventUpdated(before, after).catch((e) => console.error("notify failed", e));
+    // Awaited on purpose: on serverless, the function can be frozen the
+    // instant a response is returned, so a fire-and-forget send here would
+    // often never actually complete. A slow email service will delay the
+    // response slightly, but that's preferable to silently losing emails.
+    try {
+      await notifyEventUpdated(before, after);
+    } catch (e) {
+      console.error("notify failed", e);
+    }
 
     return NextResponse.json({ event: after });
   } catch (err) {
@@ -94,7 +101,11 @@ export async function DELETE(request, { params }) {
     const deleted = await deleteEvent(params.id);
     if (!deleted) return NextResponse.json({ error: "Event not found." }, { status: 404 });
 
-    notifyEventDeleted(deleted).catch((e) => console.error("notify failed", e));
+    try {
+      await notifyEventDeleted(deleted);
+    } catch (e) {
+      console.error("notify failed", e);
+    }
 
     return NextResponse.json({ event: deleted });
   } catch (err) {

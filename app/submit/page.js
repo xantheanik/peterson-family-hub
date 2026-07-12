@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import EventForm from "@/app/components/EventForm";
 
 export default function SubmitPage() {
-  const router = useRouter();
-
   async function handleSubmit(payload) {
     const res = await fetch("/api/events", {
       method: "POST",
@@ -15,7 +12,9 @@ export default function SubmitPage() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Something went wrong.");
-    router.push(`/?added=${encodeURIComponent(payload.title)}`);
+    // A full navigation (not router.push) so the home page's Router Cache
+    // can't hand back a stale copy of the calendar/upcoming list.
+    window.location.href = `/?added=${encodeURIComponent(payload.title)}`;
   }
 
   return (
