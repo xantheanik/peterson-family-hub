@@ -3,6 +3,11 @@ import { getEventById, updateEvent, deleteEvent } from "@/lib/db";
 import { notifyEventUpdated, notifyEventDeleted } from "@/lib/notify";
 import { ALL_NAMES } from "@/lib/family";
 
+// Never cache — always read/write the live event.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET(request, { params }) {
   try {
     const event = await getEventById(params.id);

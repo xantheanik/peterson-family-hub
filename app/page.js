@@ -7,8 +7,13 @@ import UpcomingEvents from "@/app/components/UpcomingEvents";
 import AddedBanner from "@/app/components/AddedBanner";
 
 // Always render fresh on each request so newly added events show up
-// immediately (rather than serving a snapshot from build time).
+// immediately (rather than serving a snapshot from build time or a cached
+// database read). Both directives are needed: dynamic="force-dynamic" stops
+// the page itself from being statically cached, and revalidate=0 stops
+// Vercel's Data Cache from separately caching the database read behind it.
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 const genSlug = {
   "Generation 1": "gen-1",

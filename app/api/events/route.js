@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getAllEvents, createEvent } from "@/lib/db";
 import { ALL_NAMES } from "@/lib/family";
 
+// Never cache — this always needs the live list.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET() {
   try {
     const events = await getAllEvents();
