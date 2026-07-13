@@ -43,7 +43,7 @@ export default async function HomePage() {
     <main className="wrap">
       <header className="hub-header">
         <h1 className="hub-title">Peterson Family Hub</h1>
-        <p className="hub-tagline">One calendar. Every generation.</p>
+        <p className="hub-tagline">Family events, gatherings, and important dates.</p>
       </header>
 
       <AddedBanner />
